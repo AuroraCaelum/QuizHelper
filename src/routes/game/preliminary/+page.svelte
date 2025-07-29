@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { settingsStore, type Team } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
@@ -54,6 +55,10 @@
 			} else {
 				handleScoreChange(team, 1);
 			}
+		} else if (key === 'Escape') {
+			if (confirm('Are you sure to move back? All of the score data will be reset.')) {
+				goto('/');
+			}
 		}
 	}
 </script>
@@ -67,16 +72,16 @@
 		{#each sortedTeams as team, i (team.id)}
 			<div animate:flip={{ duration: 500 }} class="flex items-stretch space-x-2">
 				<div
-					class="flex flex-grow flex-col items-center justify-center rounded-lg bg-gray-800 p-2"
+					class="flex flex-grow flex-col items-center rounded-lg bg-gray-800 p-2"
 				>
+					<span class="mb-4 font-black text-cyan-400" style:font-size="{scoreSize}rem"
+						>{team.score}</span
+					>
 					<span
 						class="font-bold"
 						style:writing-mode="vertical-rl"
 						style:font-size="{teamNameSize}rem"
 						>{team.name}</span
-					>
-					<span class="mt-4 font-black text-cyan-400" style:font-size="{scoreSize}rem"
-						>{team.score}</span
 					>
 				</div>
 
@@ -90,11 +95,5 @@
 		{/each}
 	</div>
 
-	<div class="absolute bottom-4 right-4">
-		<a
-			href="/"
-			class="rounded-lg bg-cyan-600 px-5 py-2 text-lg font-bold text-white hover:bg-cyan-500"
-			>Back to Settings</a
-		>
-	</div>
+	
 </div>

@@ -1,36 +1,47 @@
 <script lang="ts">
-	import { settingsStore, type Settings, type Team, type Signal } from '$lib/stores';
+	import {
+		settingsStore,
+		defaultSettings,
+		type Settings,
+		type Team,
+		type Signal
+	} from '$lib/stores';
 
 	// --- State for shortcut setting ---
 	let listeningFor: 'right' | 'wrong' | null = null;
 
-	// --- Reactive Logic ---
-	// This $: block runs whenever the variables it depends on change.
+	// --- Reactive statement to manage team settings ---
 	$: {
-		// Synchronize the number of teams with the teams array
-		if ($settingsStore.teams.length !== $settingsStore.numberOfTeams) {
-			const currentCount = $settingsStore.teams.length;
-			const newCount = $settingsStore.numberOfTeams;
+		const { numberOfTeams, teams } = $settingsStore;
+		const currentCount = teams.length;
 
-			if (newCount > currentCount) {
-				// Add new teams
-				const signals: Signal[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-				for (let i = currentCount; i < newCount; i++) {
-					$settingsStore.teams.push({
+		if (numberOfTeams !== currentCount) {
+			const newTeams = [...teams];
+			if (numberOfTeams > currentCount) {
+				const signals = Array.from({ length: 26 }, (_, j) => String.fromCharCode(65 + j));
+				for (let i = currentCount; i < numberOfTeams; i++) {
+					newTeams.push({
 						id: i + 1,
 						name: `Team ${i + 1}`,
 						signal: signals[i % signals.length],
 						score: 0
 					});
 				}
+				$settingsStore.teams = newTeams;
 			} else {
-				// Remove teams
-				$settingsStore.teams = $settingsStore.teams.slice(0, newCount);
+				$settingsStore.teams = teams.slice(0, numberOfTeams);
 			}
 		}
 	}
 
+	
+
 	// --- Event Handlers ---
+	function handleGameModeChange() {
+		$settingsStore.numberOfTeams = defaultSettings.numberOfTeams;
+		$settingsStore.teams = defaultSettings.teams;
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (!listeningFor) return;
 
@@ -57,6 +68,30 @@
 		<!-- General Settings -->
 		<div class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-3">
 			<div class="rounded-lg bg-gray-800 p-4">
+				<label for="game-mode" class="block text-sm font-medium text-gray-300">Game Mode</label>
+				<select
+					id="game-mode"
+					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+					bind:value={$settingsStore.gameMode}
+					on:change={handleGameModeChange}
+				>
+					<option value="final">Final Mode</option>
+					<option value="preliminary">Preliminary Mode</option>
+				</select>
+			</div>
+			{#if $settingsStore.gameMode === 'preliminary'}
+				<div class="rounded-lg bg-gray-800 p-4">
+					<label for="cutline" class="block text-sm font-medium text-gray-300">Cutline</label>
+					<input
+						type="number"
+						id="cutline"
+						min="0"
+						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+						bind:value={$settingsStore.cutline}
+					/>
+				</div>
+			{/if}
+			<div class="rounded-lg bg-gray-800 p-4">
 				<label for="num-teams" class="block text-sm font-medium text-gray-300"
 					>Number of Teams</label
 				>
@@ -64,7 +99,7 @@
 					type="number"
 					id="num-teams"
 					min="1"
-					max="12"
+					max="26"
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
 					bind:value={$settingsStore.numberOfTeams}
 				/>
@@ -123,6 +158,26 @@
 							<option>E</option>
 							<option>F</option>
 							<option>G</option>
+							<option>--</option>
+							<option>H</option>
+							<option>I</option>
+							<option>J</option>
+							<option>K</option>
+							<option>L</option>
+							<option>M</option>
+							<option>N</option>
+							<option>O</option>
+							<option>P</option>
+							<option>Q</option>
+							<option>R</option>
+							<option>S</option>
+							<option>T</option>
+							<option>U</option>
+							<option>V</option>
+							<option>W</option>
+							<option>X</option>
+							<option>Y</option>
+							<option>Z</option>
 						</select>
 					</div>
 				</div>

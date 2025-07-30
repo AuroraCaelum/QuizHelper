@@ -1,34 +1,34 @@
 # QuizHelper
 
-QuizHelper for BBC Youth Bible Quiz.
+성경침례교회 청년부 암송대회 지원 프로그램입니다.
 
-## Requirements
-- Node.js version 18 or higher
-- A physical button that sends signals to the API endpoint
-> Important: Your laptop or computer's IP address must be set to `192.168.100.101` to receive signals from the button.
+## 시스템 요구사항
+- Node.js version 18 or higher (설치 링크: [Node.js 공식 홈페이지](https://nodejs.org/ko/download))
+- API Endpoint에 신호를 보낼 수 있는 물리 버튼
+> 중요사항: 노트북 혹은 데스크탑의 IP 주소가 `192.168.100.101`로 고정되어 있어야 물리 버튼의 신호를 받아올 수 있습니다.
 
-## How to Set Up
-1. **Clone the repository**:
+## 세팅 방법
+1. **레포지토리 클론하기**:
     ```bash
     git clone https://github.com/AuroraCaelum/QuizHelper.git
     cd QuizHelper
     ```
 
-2. **Install dependencies**:
+2. **의존성 설치하기**:
     ```bash
     npm install
     ```
 
-3. **Run the development server**:
+3. **개발 서버 실행**:
     ```bash
     npm run dev
     ```
 
-4. **Open your browser** and navigate to `http://localhost:9090` to view the application.
+4. **브라우저를 열고** `http://localhost:9090` 에 접속하세요.
 
-## Signal Endpoint
+## 버튼 신호 엔드포인트
 
-The physical button signals are sent to the API endpoint at `localhost:9090` (or, as default set in the current button, `192.168.100.101:9090`). The API expects a GET request with the following body:
+물리 버튼의 신호는 `localhost:9090`의 엔드포인트로 전달됩니다, (혹은, 현재 버튼의 기본 설정 상태인 `192.168.100.101:9090`로 전달됩니다). API는 다음과 같은 GET 요청을 받아서 처리할 수 있습니다.
 
 ```json
 {
@@ -36,13 +36,13 @@ The physical button signals are sent to the API endpoint at `localhost:9090` (or
 }
 ```
 
-The `sig` field contains a unique signal string, which is A-G.
+`sig` 필드는 단일 캐릭터 신호 입력을 포함합니다. (A-J)
 
-## Dependencies
+## 의존성
 
-This project uses [SvelteKit](https://kit.svelte.dev/) and requires Node.js version 18 or higher.
+이 프로젝트는 [SvelteKit](https://kit.svelte.dev/) 로 개발되었으며, Node.js +18을 요구합니다.
 
-Add-ons include:
+포함된 애드온:
 - [Svelte](https://svelte.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)

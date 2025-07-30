@@ -8,6 +8,7 @@ export interface Team {
 	name: string;
 	signal: Signal;
 	score: number;
+    handicapApplied?: boolean; // Optional for preliminary mode
 }
 
 export interface Settings {
@@ -20,6 +21,7 @@ export interface Settings {
 	wrongAnswerShortcut: string;
 	gameMode: 'preliminary' | 'final';
 	cutline: number;
+    handicapCutline?: number; // Optional for preliminary mode
 }
 
 export const defaultSettings: Settings = {
@@ -31,7 +33,8 @@ export const defaultSettings: Settings = {
 	rightAnswerShortcut: 'r',
 	wrongAnswerShortcut: 'w',
 	gameMode: 'final',
-	cutline: 0
+	cutline: 0,
+    handicapCutline: 0 // Default to 0 for final mode
 };
 
 function generateInitialTeams(numTeams: number): Team[] {

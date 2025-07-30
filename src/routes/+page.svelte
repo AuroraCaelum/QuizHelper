@@ -81,6 +81,18 @@
 						bind:value={$settingsStore.cutline}
 					/>
 				</div>
+				<div class="rounded-lg bg-gray-800 p-4">
+					<label for="handicap" class="block text-sm font-medium text-gray-300"
+						>Handicap Cutline</label
+					>
+					<input
+						type="number"
+						id="handicap-cutline"
+						min="0"
+						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+						bind:value={$settingsStore.handicapCutline}
+					/>
+				</div>
 			{/if}
 			<div class="rounded-lg bg-gray-800 p-4">
 				<label for="num-teams" class="block text-sm font-medium text-gray-300"
@@ -123,53 +135,73 @@
 		<h2 class="mb-4 text-2xl font-semibold text-cyan-400">Team Name & Signal</h2>
 		<div class="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each $teamStore as team, i (team.id)}
-				<div class="flex items-center gap-4 rounded-lg bg-gray-800 p-4">
-					<span class="text-xl font-bold text-cyan-400">{i + 1}</span>
-					<div class="flex-grow">
-						<label for="team-name-{i}" class="sr-only">Team {i + 1} Name</label>
-						<input
-							type="text"
-							id="team-name-{i}"
-							placeholder="Team Name"
-							class="w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-							bind:value={team.name}
-						/>
+				<div class="flex flex-col gap-4 rounded-lg bg-gray-800 p-4">
+					<div class="flex items-center gap-4">
+						<span class="text-xl font-bold text-cyan-400">{i + 1}</span>
+						<div class="flex-grow">
+							<label for="team-name-{i}" class="sr-only">Team {i + 1} Name</label>
+							<input
+								type="text"
+								id="team-name-{i}"
+								placeholder="Team Name"
+								class="w-full rounded-md border-gray-600 bg-gray-700 p-1 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+								bind:value={team.name}
+							/>
+						</div>
 					</div>
-					<div>
-						<label for="team-signal-{i}" class="sr-only">Team {i + 1} Signal</label>
-						<select
-							id="team-signal-{i}"
-							class="rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-							bind:value={team.signal}
-						>
-							<option>A</option>
-							<option>B</option>
-							<option>C</option>
-							<option>D</option>
-							<option>E</option>
-							<option>F</option>
-							<option>G</option>
-							<option>--</option>
-							<option>H</option>
-							<option>I</option>
-							<option>J</option>
-							<option>K</option>
-							<option>L</option>
-							<option>M</option>
-							<option>N</option>
-							<option>O</option>
-							<option>P</option>
-							<option>Q</option>
-							<option>R</option>
-							<option>S</option>
-							<option>T</option>
-							<option>U</option>
-							<option>V</option>
-							<option>W</option>
-							<option>X</option>
-							<option>Y</option>
-							<option>Z</option>
-						</select>
+					<div class="flex items-center gap-4">
+						<div class="flex-grow">
+							<label for="team-signal-{i}" class="sr-only">Team {i + 1} Signal</label>
+							<select
+								id="team-signal-{i}"
+								class="w-full rounded-md border-gray-600 bg-gray-700 p-1 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+								bind:value={team.signal}
+							>
+								<option>A</option>
+								<option>B</option>
+								<option>C</option>
+								<option>D</option>
+								<option>E</option>
+								<option>F</option>
+								<option>G</option>
+								<option>H</option>
+								<option>I</option>
+								<option>J</option>
+								<option>--</option>
+								<option>K</option>
+								<option>L</option>
+								<option>M</option>
+								<option>N</option>
+								<option>O</option>
+								<option>P</option>
+								<option>Q</option>
+								<option>R</option>
+								<option>S</option>
+								<option>T</option>
+								<option>U</option>
+								<option>V</option>
+								<option>W</option>
+								<option>X</option>
+								<option>Y</option>
+								<option>Z</option>
+							</select>
+						</div>
+						{#if $settingsStore.gameMode === 'preliminary'}
+							<div>
+								<label class="inline-flex items-center">
+									<button
+										class="rounded-md px-4 py-2 font-semibold"
+										class:bg-green-600={team.handicapApplied}
+										class:bg-gray-600={!team.handicapApplied}
+										class:hover:bg-green-500={team.handicapApplied}
+										class:hover:bg-gray-500={!team.handicapApplied}
+										on:click={() => (team.handicapApplied = !team.handicapApplied)}
+									>
+										{team.handicapApplied ? 'Handicap On' : 'Handicap Off'}
+									</button>
+								</label>
+							</div>
+						{/if}
 					</div>
 				</div>
 			{/each}

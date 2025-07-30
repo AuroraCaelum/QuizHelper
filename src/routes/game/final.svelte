@@ -7,6 +7,9 @@
 	let activeTeamTimeout: number;
 	let isLocked = false; // For interrupt delay
 
+	let feedbackMessage: { text: string; type: 'correct' | 'wrong' } | null = null;
+	let feedbackTimeout: number;
+
 	let pendingTeamNumber: string | null = null; // For score updates
 
 	let teamRanks = new Map<number, number>();
@@ -30,6 +33,12 @@
 	function handleSignal(signal: string) {
 		if (isLocked || activeTeam) return;
 
+		// If a feedback message is showing, clear it immediately
+		if (feedbackMessage) {
+			feedbackMessage = null;
+			clearTimeout(feedbackTimeout);
+		}
+
 		const team = $teamStore.find((t) => t.signal === signal);
 		if (team) {
 			activeTeam = team;
@@ -46,6 +55,18 @@
 				isLocked = false;
 			}, $settingsStore.interruptDelay * 1000);
 		}
+	}
+
+	function showFeedback(text: string, type: 'correct' | 'wrong') {
+		feedbackMessage = { text, type };
+		activeTeam = null;
+		isLocked = false; // Reset lock to allow immediate buzz
+		clearTimeout(activeTeamTimeout);
+		clearTimeout(feedbackTimeout); // Clear previous feedback timeout if any
+
+		feedbackTimeout = window.setTimeout(() => {
+			feedbackMessage = null;
+		}, 3000);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -86,14 +107,10 @@
 		if (activeTeam) {
 			if (key === $settingsStore.rightAnswerShortcut) {
 				event.preventDefault();
-				alert($settingsStore.rightAnswerText);
-				activeTeam = null;
-				clearTimeout(activeTeamTimeout);
+				showFeedback($settingsStore.rightAnswerText, 'correct');
 			} else if (key === $settingsStore.wrongAnswerShortcut) {
 				event.preventDefault();
-				alert($settingsStore.wrongAnswerText);
-				activeTeam = null;
-				clearTimeout(activeTeamTimeout);
+				showFeedback($settingsStore.wrongAnswerText, 'wrong');
 			}
 		}
 
@@ -128,6 +145,7 @@
 			// Clean up when the component is destroyed
 			eventSource.close();
 			clearTimeout(activeTeamTimeout);
+			clearTimeout(feedbackTimeout);
 		};
 	});
 </script>
@@ -167,6 +185,21 @@
 				>
 					{activeTeam.name}
 				</h2>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Feedback Message Display (Overlay) -->
+	{#if feedbackMessage}
+		<div
+			class="absolute inset-0 z-20 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md"
+		>
+			<div
+				class="animate-pulse text-center text-8xl font-black md:text-9xl lg:text-[12rem]"
+				class:text-green-400={feedbackMessage.type === 'correct'}
+				class:text-red-400={feedbackMessage.type === 'wrong'}
+			>
+				{feedbackMessage.text}
 			</div>
 		</div>
 	{/if}

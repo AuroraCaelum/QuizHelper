@@ -25,7 +25,7 @@ export interface Settings {
 }
 
 export const defaultSettings: Settings = {
-	numberOfTeams: 4,
+	numberOfTeams: 6,
 	httpPort: 9090,
 	interruptDelay: 10,
 	rightAnswerText: 'Correct!',

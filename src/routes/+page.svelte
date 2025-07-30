@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settingsStore, teamStore, defaultSettings } from '$lib/stores';
+	import { settingsStore, teamStore, defaultSettings, type Team } from '$lib/stores';
 
 	// --- State for shortcut setting ---
 	let listeningFor: 'right' | 'wrong' | null = null;
@@ -37,6 +37,14 @@
 		if (confirm('Are you sure you want to reset all settings to their default values?')) {
 			if (confirm('This action cannot be undone. Are you absolutely sure?')) {
 				settingsStore.set(defaultSettings);
+				const numTeams = defaultSettings.numberOfTeams;
+				const defaultTeams = Array.from({ length: numTeams }, (_, i) => ({
+					id: i + 1,
+					name: `Team ${i + 1}`,
+					signal: String.fromCharCode(65 + i),
+					score: 0
+				}));
+				teamStore.set(defaultTeams);
 			}
 		}
 	}
@@ -53,6 +61,32 @@
 			$settingsStore.wrongAnswerShortcut = key;
 		}
 		listeningFor = null;
+	}
+
+	async function loadCSV() {
+		try {
+			const response = await fetch('/teamdata.csv');
+			if (!response.ok) {
+				alert('Cannot find a data file.');
+				return;
+			}
+			const csvData = await response.text();
+			const lines = csvData.trim().split('\n');
+			const newTeams: Team[] = lines.map((line) => {
+				const [id, name, type] = line.split(',');
+				return {
+					id: parseInt(id, 10),
+					name,
+					signal: String.fromCharCode(64 + parseInt(id, 10)), // A=1, B=2, ..., Z=26
+					score: 0,
+					handicapApplied: type.trim() === '학생부'
+				};
+			});
+			teamStore.set(newTeams);
+		} catch (error) {
+			console.error('Error loading CSV:', error);
+			alert('Error loading CSV file.');
+		}
 	}
 </script>
 
@@ -140,7 +174,16 @@
 		</div>
 
 		<!-- Team Settings -->
-		<h2 class="mb-4 text-2xl font-semibold text-cyan-400">Team Name & Signal</h2>
+		<div class="flex items-center justify-between">
+			<h2 class="mb-4 text-2xl font-semibold text-cyan-400">Team Name & Signal</h2>
+			{#if $settingsStore.gameMode === 'preliminary'}
+				<button
+					on:click={loadCSV}
+					class="rounded-lg bg-blue-600 px-4 py-2 text-lg font-semibold text-white transition-colors hover:bg-blue-500"
+					>Load CSV</button
+				>
+			{/if}
+		</div>
 		<div class="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each $teamStore as team, i (team.id)}
 				<div class="flex flex-col gap-4 rounded-lg bg-gray-800 p-4">

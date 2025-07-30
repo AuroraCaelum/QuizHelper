@@ -62,14 +62,17 @@
 
 		if (team) {
 			if (event.shiftKey) {
-				handleScoreChange(team, -1);
+				handleScoreChange(team, -5);
 			} else {
-				handleScoreChange(team, 1);
+				handleScoreChange(team, 5);
 			}
 		} else if (key === 'Escape') {
 			if (confirm('Are you sure to move back? All of the score data will be reset.')) {
 				goto('/');
 			}
+		} else if (key === '`') {
+			// Open Score Manager in a new tab
+			window.open('/score-management?mode=preliminary', '_blank');
 		}
 	}
 </script>
@@ -82,17 +85,14 @@
 	<div class="flex flex-grow items-stretch justify-center space-x-2">
 		{#each sortedTeams as team, i (team.id)}
 			<div animate:flip={{ duration: 500 }} class="flex items-stretch space-x-2">
-				<div
-					class="flex flex-grow flex-col items-center rounded-lg bg-gray-800 p-2"
-				>
+				<div class="flex flex-grow flex-col items-center rounded-lg bg-gray-800 p-2">
 					<span class="mb-4 font-black text-cyan-400" style:font-size="{scoreSize}rem"
 						>{team.score}</span
 					>
 					<span
 						class="font-bold"
 						style:writing-mode="vertical-rl"
-						style:font-size="{teamNameSize}rem"
-						>{team.name}</span
+						style:font-size="{teamNameSize}rem">{team.name}</span
 					>
 				</div>
 
@@ -105,6 +105,4 @@
 			</div>
 		{/each}
 	</div>
-
-	
 </div>

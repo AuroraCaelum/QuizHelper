@@ -74,12 +74,13 @@
 	function handleKeydown(event: KeyboardEvent) {
 		const key = event.key;
 
+		if (key === '`') {
+			// Open Score Manager in a new tab
+			window.open('/score-management?mode=final', '_blank');
+		}
+
 		// --- Score Update Logic ---
-		if (
-			!isNaN(parseInt(key)) &&
-			parseInt(key) > 0 &&
-			parseInt(key) <= $teamStore.length
-		) {
+		if (!isNaN(parseInt(key)) && parseInt(key) > 0 && parseInt(key) <= $teamStore.length) {
 			pendingTeamNumber = key;
 			// Reset after 1s if no arrow key is pressed
 			setTimeout(() => {

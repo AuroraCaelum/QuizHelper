@@ -28,8 +28,6 @@
 		}
 	}
 
-	
-
 	// --- Event Handlers ---
 	function handleGameModeChange() {
 		$settingsStore.numberOfTeams = defaultSettings.numberOfTeams;
@@ -243,12 +241,12 @@
 			>
 				Start Game
 			</a>
-			<a
+			<!-- <a
 				href="/score-management"
 				class="inline-block transform rounded-lg bg-blue-600 px-12 py-4 text-2xl font-bold text-white transition-transform hover:scale-105 hover:bg-blue-500"
 			>
 				Score Management
-			</a>
+			</a> -->
 		</div>
 	</div>
 </div>

@@ -5,6 +5,16 @@
 
 	let teams: Team[] = [];
 	let ipAddress = '192.168.100.101:9090';
+	let negativeScoreOption = -5;
+	let scoreOptions = [5];
+	let gameMode = 'preliminary';
+
+	// Set game mode based on URL query parameter
+	onMount(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const gameMode = urlParams.get('mode') || 'preliminary';
+		handleGameModeChange({ target: { value: gameMode } });
+	});
 
 	onMount(() => {
 		const unsubscribe = teamStore.subscribe((value) => {
@@ -25,15 +35,30 @@
 			});
 		}
 	}
+
+	function handleGameModeChange(event: Event) {
+		const select = event.target as HTMLSelectElement;
+		gameMode = select.value;
+		if (gameMode === 'final') {
+			negativeScoreOption = -10;
+			scoreOptions = [10, 20, 30, 40, 50];
+		} else {
+			negativeScoreOption = -5;
+			scoreOptions = [5];
+		}
+	}
 </script>
 
 <div class="container">
 	<h1>Score Management</h1>
 
-	<!-- <div class="ip-config">
-		<label for="ip-address">IP Address:</label>
-		<input type="text" id="ip-address" bind:value={ipAddress} />
-	</div> -->
+	<div class="game-type">
+		<label for="game-mode">Game Mode:</label>
+		<select id="game-mode" on:change={handleGameModeChange}>
+			<option value="preliminary" selected={gameMode === 'preliminary'}>Preliminary Mode</option>
+			<option value="final" selected={gameMode === 'final'}>Final Mode</option>
+		</select>
+	</div>
 
 	<div class="team-list">
 		{#each teams as team}
@@ -42,12 +67,18 @@
 				<h2>{team.name}</h2>
 				<p>Score: {team.score}</p>
 				<div class="score-buttons">
-					<!--- Final : -10, +10, +20, +30, +40, +50 -->
-					<!--- Preliminary: -5, +5 -->
-					<button on:click={() => updateScore(team.id, -3)}>-3</button>
+					<button on:click={() => updateScore(team.id, negativeScoreOption)} class="negative-score"
+						>{negativeScoreOption}</button
+					>
+					{#each scoreOptions as option}
+						<button on:click={() => updateScore(team.id, option)} class="positive-score"
+							>{option > 0 ? `+${option}` : option}</button
+						>
+					{/each}
+					<!-- <button on:click={() => updateScore(team.id, -3)}>-3</button>
 					<button on:click={() => updateScore(team.id, -1)}>-1</button>
 					<button on:click={() => updateScore(team.id, 1)}>+1</button>
-					<button on:click={() => updateScore(team.id, 3)}>+3</button>
+					<button on:click={() => updateScore(team.id, 3)}>+3</button> -->
 				</div>
 			</div>
 		{/each}
@@ -83,11 +114,21 @@
 
 	.score-buttons {
 		margin-top: 1rem;
-		display: flex;
+		display: grid;
 		gap: 0.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
 	}
 
-	.score-buttons button {
+	.negative-score {
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 4px;
+		background-color: #dc3545;
+		color: white;
+		cursor: pointer;
+	}
+
+	.positive-score {
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 4px;

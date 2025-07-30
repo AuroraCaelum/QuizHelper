@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { settingsStore, teamStore, type Team } from '$lib/stores';
+    import { flip } from 'svelte/animate';
 
 	let activeTeam: Team | null = null;
 	let activeTeamTimeout: number;
@@ -8,45 +9,21 @@
 
 	let pendingTeamNumber: string | null = null; // For score updates
 
-	// --- Layout Helper ---
-	// This function determines the grid position for each team box.
-	function getPositionClasses(index: number, total: number): string {
-		const positions: { [key: number]: string[] } = {
-			1: ['col-start-2 row-start-1 justify-self-center self-center'],
-			2: [
-				'col-start-1 row-start-1 justify-self-center self-center',
-				'col-start-3 row-start-1 justify-self-center self-center'
-			],
-			3: [
-				'col-start-1 row-start-1 self-start', // TL
-				'col-start-3 row-start-1 self-start justify-self-end', // TR
-				'col-start-2 row-start-2 justify-self-center self-end' // BC
-			],
-			4: [
-				'col-start-1 row-start-1 self-start', // TL
-				'col-start-3 row-start-1 self-start justify-self-end', // TR
-				'col-start-1 row-start-2 self-end', // BL
-				'col-start-3 row-start-2 self-end justify-self-end' // BR
-			],
-			5: [
-				'col-start-1 row-start-1 self-start', // Top Left
-				'col-start-3 row-start-1 self-start justify-self-end', // Top Right
-				'col-start-1 row-start-2 self-end', // Bottom Left
-				'col-start-2 row-start-2 self-end justify-self-center', // Bottom Center
-				'col-start-3 row-start-2 self-end justify-self-end' // Bottom Right
-			],
-			6: [
-				'col-start-1 row-start-1 self-start', // TL
-				'col-start-2 row-start-1 self-start justify-self-center', // TC
-				'col-start-3 row-start-1 self-start justify-self-end', // TR
-				'col-start-1 row-start-2 self-end', // BL
-				'col-start-2 row-start-2 self-end justify-self-center', // BC
-				'col-start-3 row-start-2 self-end justify-self-end' // BR
-			]
-		};
-		// Default to 6-team layout for more than 6 teams
-		const layout = positions[total] || positions[6];
-		return layout[index] || '';
+	let teamRanks = new Map<number, number>();
+
+	$: {
+		// Sort teams by score to determine rank
+		const sortedTeams = [...$teamStore].sort((a, b) => b.score - a.score);
+		const newRanks = new Map<number, number>();
+		let currentRank = 1;
+		for (let i = 0; i < sortedTeams.length; i++) {
+			// Increment rank only when the score is lower than the previous team's score
+			if (i > 0 && sortedTeams[i].score < sortedTeams[i - 1].score) {
+				currentRank = i + 1;
+			}
+			newRanks.set(sortedTeams[i].id, currentRank);
+		}
+		teamRanks = newRanks;
 	}
 
 	// --- Event Handlers ---
@@ -158,27 +135,26 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <div
-	class="relative h-screen w-screen overflow-hidden bg-cover bg-center text-white"
+	class="relative flex h-screen w-screen flex-col overflow-hidden bg-cover bg-center p-4 font-sans text-white"
 	style="background-image: url(/bg.jpg);"
 >
-	<!-- Team Scores Grid -->
-	<div class="grid h-full w-full grid-cols-3 grid-rows-2 p-8">
-		{#each $teamStore as team, i (team.id)}
-			<div
-				class="bg-opacity-60 m-2 flex flex-col rounded-lg border-2 border-white/30 bg-black p-4 backdrop-blur-sm {getPositionClasses(
-					i,
-					$teamStore.length
-				)}"
-			>
-				<div class="truncate text-3xl font-bold text-cyan-300 drop-shadow-lg lg:text-5xl">
-					{team.name}
-				</div>
-				<div class="mt-2 text-5xl font-black text-white drop-shadow-lg lg:text-8xl">
-					{team.score}
-				</div>
-			</div>
-		{/each}
-	</div>
+    <h1 class="mb-8 text-center text-4xl font-bold text-cyan-400 drop-shadow-lg">Final Round</h1>
+
+    <div class="flex flex-1 items-center justify-center">
+        <div class="grid w-full max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {#each $teamStore as team (team.id)}
+                <div
+                    animate:flip={{ duration: 500 }}
+                    class="relative flex flex-col items-center justify-center rounded-xl border-2 border-white/30 bg-black/60 p-6 backdrop-blur-sm shadow-lg"
+                >
+                    <div class="absolute top-2 left-2 text-2xl font-bold text-yellow-400">#{teamRanks.get(team.id) || '-'}</div>
+                    <span class="text-6xl font-black text-cyan-400 drop-shadow-lg">{team.score}</span>
+                    <span class="mt-2 text-3xl font-bold text-white drop-shadow-md">{team.name}</span>
+                </div>
+            {/each}
+        </div>
+    </div>
+
 
 	<!-- Active Team Display (Overlay) -->
 	{#if activeTeam}

@@ -9,8 +9,14 @@
 	$: sortedTeams = (() => {
 		const cutline = $settingsStore.cutline;
 		const handicapCutline = $settingsStore.handicapCutline;
+		const anyHandicappedTeamHasScored = teams.some((t) => t.handicapApplied && t.score > 0);
 
-		if (cutline <= 0 || !handicapCutline || handicapCutline <= 0) {
+		if (
+			cutline <= 0 ||
+			!handicapCutline ||
+			handicapCutline <= 0 ||
+			!anyHandicappedTeamHasScored
+		) {
 			return teams.slice().sort((a, b) => b.score - a.score);
 		}
 
@@ -139,6 +145,7 @@
 					>
 					<span
 						class="font-bold"
+						class:text-green-400={team.handicapApplied}
 						style:writing-mode="vertical-rl"
 						style:font-size="{teamNameSize}rem">{team.name}</span
 					>

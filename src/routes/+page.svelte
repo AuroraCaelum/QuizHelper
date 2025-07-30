@@ -33,6 +33,14 @@
 		$settingsStore.numberOfTeams = defaultSettings.numberOfTeams;
 	}
 
+	function handleResetSettings() {
+		if (confirm('Are you sure you want to reset all settings to their default values?')) {
+			if (confirm('This action cannot be undone. Are you absolutely sure?')) {
+				settingsStore.set(defaultSettings);
+			}
+		}
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (!listeningFor) return;
 
@@ -279,6 +287,16 @@
 			>
 				Score Management
 			</a> -->
+		</div>
+
+		<!-- Reset Button -->
+		<div class="mt-12 flex justify-center">
+			<button
+				on:click={handleResetSettings}
+				class="rounded-lg bg-red-800 px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-red-700"
+			>
+				Reset All Settings
+			</button>
 		</div>
 	</div>
 </div>

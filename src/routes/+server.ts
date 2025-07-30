@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	// Broadcast the signal to any connected Game Page
-	sse.broadcast({ type: 'signal', payload: signal });
+	sse.broadcast('signal', signal);
 
 	return new Response(`Signal '${signal}' received.`, {
 		headers: { 'Content-Type': 'text/plain' }

@@ -72,8 +72,25 @@ export const teamStore = writable<Team[]>(initialTeams);
 
 if (browser) {
 	teamStore.subscribe((value) => {
-		// When teams are updated, also update numberOfTeams in the settings store
-		settingsStore.update((settings) => ({ ...settings, numberOfTeams: value.length }));
-		window.localStorage.setItem(teamStorageKey, JSON.stringify(value));
+		// When teams are updated via the store, update localStorage
+		if (value) {
+			const currentStorage = window.localStorage.getItem(teamStorageKey);
+			const newStorage = JSON.stringify(value);
+			if (currentStorage !== newStorage) {
+				window.localStorage.setItem(teamStorageKey, newStorage);
+				// This also implicitly updates numberOfTeams in the settings store
+				settingsStore.update((settings) => ({ ...settings, numberOfTeams: value.length }));
+			}
+		}
+	});
+
+	// Listen for changes in other tabs
+	window.addEventListener('storage', (event) => {
+		if (event.key === teamStorageKey && event.newValue) {
+			teamStore.set(JSON.parse(event.newValue));
+		}
+		if (event.key === settingsStorageKey && event.newValue) {
+			settingsStore.set(JSON.parse(event.newValue));
+		}
 	});
 }

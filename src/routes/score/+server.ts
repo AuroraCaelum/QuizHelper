@@ -1,15 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { sse } from '../../lib/sse';
+import type { Team } from '../../app';
 
-export const GET: RequestHandler = async ({ url }) => {
-	const sig = url.searchParams.get('sig');
-	const score = url.searchParams.get('score');
+export const POST: RequestHandler = async ({ request }) => {
+	const { teams } = (await request.json()) as { teams: Team[] };
 
-	if (sig && score) {
-		sse.broadcast({ sig, score: parseInt(score, 10) });
+	if (teams) {
+		sse.broadcast('teams', teams);
 		return json({ success: true });
 	}
 
-	return json({ success: false, message: 'Missing sig or score' }, { status: 400 });
+	return json({ success: false, message: 'Missing teams data' }, { status: 400 });
 };

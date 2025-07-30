@@ -16,18 +16,12 @@
 		};
 	});
 
-	async function updateScore(teamId: string, scoreChange: number) {
-		console.log(`Updating score for team ${teamId} by ${scoreChange}`);
-		// try {
-		// 	await fetch(`http://${ipAddress}/score?sig=${teamId}&score=${scoreChange}`);
-		// } catch (error) {
-		// 	alert('Failed to update score:' + error);
-		// }
+	async function updateScore(teamId: number, scoreChange: number) {
 		const team = teams.find((t) => t.id === teamId);
 		if (team) {
 			team.score += scoreChange;
 			teamStore.update((currentTeams) => {
-				return currentTeams.map((t) => (String(t.id) === teamId ? { ...t, score: team.score } : t));
+				return currentTeams.map((t) => (t.id === teamId ? { ...t, score: team.score } : t));
 			});
 		}
 	}
@@ -36,10 +30,10 @@
 <div class="container">
 	<h1>Score Management</h1>
 
-	<div class="ip-config">
+	<!-- <div class="ip-config">
 		<label for="ip-address">IP Address:</label>
 		<input type="text" id="ip-address" bind:value={ipAddress} />
-	</div>
+	</div> -->
 
 	<div class="team-list">
 		{#each teams as team}

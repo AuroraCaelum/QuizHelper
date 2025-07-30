@@ -22,19 +22,22 @@ export const sse = {
 
 	/**
 	 * Sends data to all connected clients.
+	 * @param event The event type to send.
 	 * @param data The data object to send.
 	 */
-	broadcast(data: any) {
+	broadcast(event: string, data: any) {
 		if (controllers.size === 0) {
 			console.log('No clients connected to broadcast to.');
 			return;
 		}
-		
-		console.log(`Broadcasting data to ${controllers.size} client(s): ${JSON.stringify(data)}`);
+
+		const message = JSON.stringify({ type: event, payload: data });
+		console.log(`Broadcasting event '${event}' to ${controllers.size} client(s): ${message}`);
+
 		for (const controller of controllers) {
 			try {
 				// Enqueue the data in the SSE format.
-				controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
+				controller.enqueue(`data: ${message}\n\n`);
 			} catch (e) {
 				// The client might have disconnected without the `cancel` event firing yet.
 				// We can safely remove it here.

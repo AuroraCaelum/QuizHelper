@@ -151,15 +151,29 @@
 
 	// Prevent accidental navigation
 	onMount(() => {
+		// Push a new state to the history stack to intercept the back button
+		history.pushState(null, '', location.href);
+
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 			event.preventDefault();
 			return (event.returnValue = 'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
 		};
 
+		const handlePopState = () => {
+			if (confirm('Do not refresh or navigate backward if the game is still running! It might cause losing all the data.')) {
+				history.back(); // Allow navigation
+			} else {
+				// Push the state back to effectively cancel the back action
+				history.pushState(null, '', location.href);
+			}
+		};
+
 		window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('popstate', handlePopState);
 
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.removeEventListener('popstate', handlePopState);
 		};
 	});
 </script>

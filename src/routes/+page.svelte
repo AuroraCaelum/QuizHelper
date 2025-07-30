@@ -88,6 +88,10 @@
 			alert('Error loading CSV file.');
 		}
 	}
+
+	function handleTeamChange() {
+		$teamStore = $teamStore;
+	}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -105,8 +109,11 @@
 				<select
 					id="game-mode"
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-					bind:value={$settingsStore.gameMode}
-					on:change={handleGameModeChange}
+					value={$settingsStore.gameMode}
+					on:change={(e) => {
+						$settingsStore.gameMode = e.currentTarget.value;
+						handleGameModeChange();
+					}}
 				>
 					<option value="final">Final Mode</option>
 					<option value="preliminary">Preliminary Mode</option>
@@ -120,7 +127,8 @@
 						id="cutline"
 						min="0"
 						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-						bind:value={$settingsStore.cutline}
+						value={$settingsStore.cutline}
+						on:input={(e) => ($settingsStore.cutline = e.currentTarget.valueAsNumber)}
 					/>
 				</div>
 				<div class="rounded-lg bg-gray-800 p-4">
@@ -132,7 +140,8 @@
 						id="handicap-cutline"
 						min="0"
 						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-						bind:value={$settingsStore.handicapCutline}
+						value={$settingsStore.handicapCutline}
+						on:input={(e) => ($settingsStore.handicapCutline = e.currentTarget.valueAsNumber)}
 					/>
 				</div>
 			{/if}
@@ -146,7 +155,8 @@
 					min="1"
 					max="26"
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-					bind:value={$settingsStore.numberOfTeams}
+					value={$settingsStore.numberOfTeams}
+					on:input={(e) => ($settingsStore.numberOfTeams = e.currentTarget.valueAsNumber)}
 				/>
 			</div>
 			<div class="rounded-lg bg-gray-800 p-4">
@@ -155,7 +165,8 @@
 					type="number"
 					id="http-port"
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-					bind:value={$settingsStore.httpPort}
+					value={$settingsStore.httpPort}
+					on:input={(e) => ($settingsStore.httpPort = e.currentTarget.valueAsNumber)}
 				/>
 			</div>
 			<div class="rounded-lg bg-gray-800 p-4">
@@ -168,7 +179,8 @@
 					step="0.1"
 					id="interrupt-delay"
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-					bind:value={$settingsStore.interruptDelay}
+					value={$settingsStore.interruptDelay}
+					on:input={(e) => ($settingsStore.interruptDelay = e.currentTarget.valueAsNumber)}
 				/>
 			</div>
 		</div>
@@ -196,7 +208,11 @@
 								id="team-name-{i}"
 								placeholder="Team Name"
 								class="w-full rounded-md border-gray-600 bg-gray-700 p-1 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-								bind:value={team.name}
+								value={team.name}
+								on:input={(e) => {
+									team.name = e.currentTarget.value;
+									handleTeamChange();
+								}}
 							/>
 						</div>
 					</div>
@@ -206,7 +222,11 @@
 							<select
 								id="team-signal-{i}"
 								class="w-full rounded-md border-gray-600 bg-gray-700 p-1 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-								bind:value={team.signal}
+								value={team.signal}
+								on:change={(e) => {
+									team.signal = e.currentTarget.value;
+									handleTeamChange();
+								}}
 							>
 								<option>A</option>
 								<option>B</option>
@@ -246,7 +266,10 @@
 										class:bg-gray-600={!team.handicapApplied}
 										class:hover:bg-green-500={team.handicapApplied}
 										class:hover:bg-gray-500={!team.handicapApplied}
-										on:click={() => (team.handicapApplied = !team.handicapApplied)}
+										on:click={() => {
+											team.handicapApplied = !team.handicapApplied;
+											handleTeamChange();
+										}}
 									>
 										{team.handicapApplied ? 'Handicap On' : 'Handicap Off'}
 									</button>
@@ -270,7 +293,8 @@
 						type="text"
 						id="right-answer-text"
 						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-						bind:value={$settingsStore.rightAnswerText}
+						value={$settingsStore.rightAnswerText}
+						on:input={(e) => ($settingsStore.rightAnswerText = e.currentTarget.value)}
 					/>
 				</div>
 				<div>
@@ -281,7 +305,8 @@
 						type="text"
 						id="wrong-answer-text"
 						class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
-						bind:value={$settingsStore.wrongAnswerText}
+						value={$settingsStore.wrongAnswerText}
+						on:input={(e) => ($settingsStore.wrongAnswerText = e.currentTarget.value)}
 					/>
 				</div>
 			</div>

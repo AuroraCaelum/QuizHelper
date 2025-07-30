@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { settingsStore, teamStore, defaultSettings, type Team, type Signal } from '$lib/stores';
+	import { settingsStore, teamStore, defaultSettings } from '$lib/stores';
 
 	// --- State for shortcut setting ---
 	let listeningFor: 'right' | 'wrong' | null = null;

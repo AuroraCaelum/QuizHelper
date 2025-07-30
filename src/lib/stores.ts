@@ -8,7 +8,7 @@ export interface Team {
 	name: string;
 	signal: Signal;
 	score: number;
-    handicapApplied?: boolean; // Optional for preliminary mode
+	handicapApplied?: boolean; // Optional for preliminary mode
 }
 
 export interface Settings {
@@ -21,7 +21,7 @@ export interface Settings {
 	wrongAnswerShortcut: string;
 	gameMode: 'preliminary' | 'final';
 	cutline: number;
-    handicapCutline?: number; // Optional for preliminary mode
+	handicapCutline?: number; // Optional for preliminary mode
 }
 
 export const defaultSettings: Settings = {
@@ -34,7 +34,7 @@ export const defaultSettings: Settings = {
 	wrongAnswerShortcut: 'w',
 	gameMode: 'final',
 	cutline: 0,
-    handicapCutline: 0 // Default to 0 for final mode
+	handicapCutline: 0 // Default to 0 for final mode
 };
 
 function generateInitialTeams(numTeams: number): Team[] {
@@ -51,9 +51,13 @@ const settingsStorageKey = 'quizSettings';
 const storedSettings = browser ? window.localStorage.getItem(settingsStorageKey) : null;
 const initialSettings: Settings = storedSettings ? JSON.parse(storedSettings) : defaultSettings;
 
+interface LegacySettings extends Settings {
+	teams?: Team[];
+}
+
 // Clean up legacy 'teams' property from settings if it exists
-if ((initialSettings as any).teams) {
-	delete (initialSettings as any).teams;
+if ((initialSettings as LegacySettings).teams) {
+	delete (initialSettings as LegacySettings).teams;
 }
 
 export const settingsStore = writable<Settings>(initialSettings);

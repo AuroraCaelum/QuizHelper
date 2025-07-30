@@ -4,7 +4,6 @@
 	import type { Team } from '../../app';
 
 	let teams: Team[] = [];
-	let ipAddress = '192.168.100.101:9090';
 	let negativeScoreOption = -5;
 	let scoreOptions = [5];
 	let gameMode = 'preliminary';
@@ -61,7 +60,7 @@
 	</div>
 
 	<div class="team-list">
-		{#each teams as team}
+		{#each teams as team (team.id)}
 			<div class="team-card">
 				<p>Team {team.id}</p>
 				<h2>{team.name}</h2>
@@ -70,7 +69,7 @@
 					<button on:click={() => updateScore(team.id, negativeScoreOption)} class="negative-score"
 						>{negativeScoreOption}</button
 					>
-					{#each scoreOptions as option}
+					{#each scoreOptions as option (option)}
 						<button on:click={() => updateScore(team.id, option)} class="positive-score"
 							>{option > 0 ? `+${option}` : option}</button
 						>

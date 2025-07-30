@@ -163,7 +163,7 @@
 >
 	<!-- Team Scores Grid -->
 	<div class="grid h-full w-full grid-cols-3 grid-rows-2 p-8">
-		{#each $teamStore as team, i}
+		{#each $teamStore as team, i (team.id)}
 			<div
 				class="bg-opacity-60 m-2 flex flex-col rounded-lg border-2 border-white/30 bg-black p-4 backdrop-blur-sm {getPositionClasses(
 					i,

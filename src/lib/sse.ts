@@ -25,7 +25,7 @@ export const sse = {
 	 * @param event The event type to send.
 	 * @param data The data object to send.
 	 */
-	broadcast(event: string, data: any) {
+	broadcast(event: string, data: unknown) {
 		if (controllers.size === 0) {
 			console.log('No clients connected to broadcast to.');
 			return;
@@ -38,7 +38,7 @@ export const sse = {
 			try {
 				// Enqueue the data in the SSE format.
 				controller.enqueue(`data: ${message}\n\n`);
-			} catch (e) {
+			} catch {
 				// The client might have disconnected without the `cancel` event firing yet.
 				// We can safely remove it here.
 				console.warn('Could not send to a client, removing it from the broadcast list.');

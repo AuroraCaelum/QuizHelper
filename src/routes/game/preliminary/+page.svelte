@@ -6,7 +6,55 @@
 	import { fade } from 'svelte/transition';
 
 	let teams: Team[] = [];
-	$: sortedTeams = teams.slice().sort((a, b) => b.score - a.score);
+	$: sortedTeams = (() => {
+		const cutline = $settingsStore.cutline;
+		const handicapCutline = $settingsStore.handicapCutline;
+
+		if (cutline <= 0 || !handicapCutline || handicapCutline <= 0) {
+			return teams.slice().sort((a, b) => b.score - a.score);
+		}
+
+		const sortedByScore = teams.slice().sort((a, b) => b.score - a.score);
+
+		let inCutline = sortedByScore.slice(0, cutline);
+		let outOfCutline = sortedByScore.slice(cutline);
+
+		const handicappedInCutlineCount = inCutline.filter((t) => t.handicapApplied).length;
+
+		if (handicappedInCutlineCount < handicapCutline) {
+			const nonHandicappedInCutline = inCutline.filter((t) => !t.handicapApplied);
+			const handicappedOutOfCutline = outOfCutline.filter((t) => t.handicapApplied);
+
+			const swapsNeeded = Math.min(
+				handicapCutline - handicappedInCutlineCount,
+				nonHandicappedInCutline.length,
+				handicappedOutOfCutline.length
+			);
+
+			if (swapsNeeded > 0) {
+				const toSwapOut = nonHandicappedInCutline
+					.sort((a, b) => a.score - b.score)
+					.slice(0, swapsNeeded);
+				const toSwapIn = handicappedOutOfCutline
+					.sort((a, b) => b.score - a.score)
+					.slice(0, swapsNeeded);
+
+				const toSwapOutIds = new Set(toSwapOut.map((t) => t.id));
+				const toSwapInIds = new Set(toSwapIn.map((t) => t.id));
+
+				inCutline = inCutline.filter((t) => !toSwapOutIds.has(t.id));
+				inCutline.push(...toSwapIn);
+
+				outOfCutline = outOfCutline.filter((t) => !toSwapInIds.has(t.id));
+				outOfCutline.push(...toSwapOut);
+			}
+		}
+
+		inCutline.sort((a, b) => b.score - a.score);
+		outOfCutline.sort((a, b) => b.score - a.score);
+
+		return [...inCutline, ...outOfCutline];
+	})();
 
 	// Reactive font size calculation
 	$: teamNameSize = Math.max(1, 3 - teams.length * 0.1);
@@ -34,7 +82,7 @@
 			}
 		};
 
-		const unsubscribeSettings = settingsStore.subscribe((settings) => {
+		const unsubscribeSettings = settingsStore.subscribe(() => {
 			// we can use this if needed in the future
 		});
 

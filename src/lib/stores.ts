@@ -4,55 +4,76 @@ import { browser } from '$app/environment';
 export type Signal = string;
 
 export interface Team {
-    id: number;
-    name: string;
-    signal: Signal;
-    score: number;
+	id: number;
+	name: string;
+	signal: Signal;
+	score: number;
 }
 
 export interface Settings {
-    numberOfTeams: number;
-    httpPort: number;
-    interruptDelay: number;
-    teams: Team[];
-    rightAnswerText: string;
-    wrongAnswerText: string;
-    rightAnswerShortcut: string;
-    wrongAnswerShortcut: string;
-    gameMode: 'preliminary' | 'final';
-    cutline: number;
+	numberOfTeams: number;
+	httpPort: number;
+	interruptDelay: number;
+	rightAnswerText: string;
+	wrongAnswerText: string;
+	rightAnswerShortcut: string;
+	wrongAnswerShortcut: string;
+	gameMode: 'preliminary' | 'final';
+	cutline: number;
 }
 
 export const defaultSettings: Settings = {
-    numberOfTeams: 4,
-    httpPort: 9090,
-    interruptDelay: 10,
-    teams: [],
-    rightAnswerText: 'Correct!',
-    wrongAnswerText: 'Incorrect!',
-    rightAnswerShortcut: 'r',
-    wrongAnswerShortcut: 'w',
-    gameMode: 'final',
-    cutline: 0
+	numberOfTeams: 4,
+	httpPort: 9090,
+	interruptDelay: 10,
+	rightAnswerText: 'Correct!',
+	wrongAnswerText: 'Incorrect!',
+	rightAnswerShortcut: 'r',
+	wrongAnswerShortcut: 'w',
+	gameMode: 'final',
+	cutline: 0
 };
 
 function generateInitialTeams(numTeams: number): Team[] {
-    return Array.from({ length: numTeams }, (_, i) => ({
-        id: i + 1,
-        name: `Team ${i + 1}`,
-        signal: String.fromCharCode(65 + i),
-        score: 0
-    }));
+	return Array.from({ length: numTeams }, (_, i) => ({
+		id: i + 1,
+		name: `Team ${i + 1}`,
+		signal: String.fromCharCode(65 + i),
+		score: 0
+	}));
 }
-defaultSettings.teams = generateInitialTeams(defaultSettings.numberOfTeams);
 
-const storageKey = 'quizSettings';
-const storedValue = browser ? window.localStorage.getItem(storageKey) : null;
-const initialValue = storedValue ? JSON.parse(storedValue) : defaultSettings;
+// --- Settings Store ---
+const settingsStorageKey = 'quizSettings';
+const storedSettings = browser ? window.localStorage.getItem(settingsStorageKey) : null;
+const initialSettings: Settings = storedSettings ? JSON.parse(storedSettings) : defaultSettings;
 
-export const settingsStore = writable<Settings>(initialValue);
+// Clean up legacy 'teams' property from settings if it exists
+if ((initialSettings as any).teams) {
+	delete (initialSettings as any).teams;
+}
+
+export const settingsStore = writable<Settings>(initialSettings);
+
 if (browser) {
-    settingsStore.subscribe((value) => {
-        window.localStorage.setItem(storageKey, JSON.stringify(value));
-    })
+	settingsStore.subscribe((value) => {
+		window.localStorage.setItem(settingsStorageKey, JSON.stringify(value));
+	});
+}
+
+// --- Team Store ---
+const teamStorageKey = 'quizTeams';
+const storedTeams = browser ? window.localStorage.getItem(teamStorageKey) : null;
+const initialTeams: Team[] = storedTeams
+	? JSON.parse(storedTeams)
+	: generateInitialTeams(initialSettings.numberOfTeams);
+
+export const teamStore = writable<Team[]>(initialTeams);
+
+if (browser) {
+	teamStore.subscribe((value) => {
+		// When teams are updated, also update numberOfTeams in the settings store
+		settingsStore.update((settings) => ({ ...settings, numberOfTeams: value.length }));
+		window.localStorage.setItem(teamStorageKey, JSON.stringify(value));
+	});
 }

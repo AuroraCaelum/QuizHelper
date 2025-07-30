@@ -1,22 +1,16 @@
 <script lang="ts">
-	import {
-		settingsStore,
-		defaultSettings,
-		type Settings,
-		type Team,
-		type Signal
-	} from '$lib/stores';
+	import { settingsStore, teamStore, defaultSettings, type Team, type Signal } from '$lib/stores';
 
 	// --- State for shortcut setting ---
 	let listeningFor: 'right' | 'wrong' | null = null;
 
 	// --- Reactive statement to manage team settings ---
 	$: {
-		const { numberOfTeams, teams } = $settingsStore;
-		const currentCount = teams.length;
+		const { numberOfTeams } = $settingsStore;
+		const currentCount = $teamStore.length;
 
 		if (numberOfTeams !== currentCount) {
-			const newTeams = [...teams];
+			const newTeams = [...$teamStore];
 			if (numberOfTeams > currentCount) {
 				const signals = Array.from({ length: 26 }, (_, j) => String.fromCharCode(65 + j));
 				for (let i = currentCount; i < numberOfTeams; i++) {
@@ -27,9 +21,9 @@
 						score: 0
 					});
 				}
-				$settingsStore.teams = newTeams;
+				$teamStore = newTeams;
 			} else {
-				$settingsStore.teams = teams.slice(0, numberOfTeams);
+				$teamStore = $teamStore.slice(0, numberOfTeams);
 			}
 		}
 	}
@@ -39,7 +33,6 @@
 	// --- Event Handlers ---
 	function handleGameModeChange() {
 		$settingsStore.numberOfTeams = defaultSettings.numberOfTeams;
-		$settingsStore.teams = defaultSettings.teams;
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -131,7 +124,7 @@
 		<!-- Team Settings -->
 		<h2 class="mb-4 text-2xl font-semibold text-cyan-400">Team Name & Signal</h2>
 		<div class="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{#each $settingsStore.teams as team, i (team.id)}
+			{#each $teamStore as team, i (team.id)}
 				<div class="flex items-center gap-4 rounded-lg bg-gray-800 p-4">
 					<span class="text-xl font-bold text-cyan-400">{i + 1}</span>
 					<div class="flex-grow">
@@ -242,13 +235,19 @@
 			</div>
 		</div>
 
-		<!-- Start Game Button -->
-		<div class="mt-12 text-center">
+		<!-- Action Buttons -->
+		<div class="mt-12 flex justify-center gap-4">
 			<a
 				href="/game"
 				class="inline-block transform rounded-lg bg-green-600 px-12 py-4 text-2xl font-bold text-white transition-transform hover:scale-105 hover:bg-green-500"
 			>
 				Start Game
+			</a>
+			<a
+				href="/score-management"
+				class="inline-block transform rounded-lg bg-blue-600 px-12 py-4 text-2xl font-bold text-white transition-transform hover:scale-105 hover:bg-blue-500"
+			>
+				Score Management
 			</a>
 		</div>
 	</div>

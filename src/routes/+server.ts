@@ -1,4 +1,4 @@
-import { eventBus } from '$lib/eventBus';
+import { sse } from '$lib/sse';
 import type { RequestHandler } from './$types';
 
 // This handles GET /api/signal?sig=A
@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	// Broadcast the signal to any connected Game Page
-	eventBus.broadcast({ type: 'signal', payload: signal });
+	sse.broadcast({ type: 'signal', payload: signal });
 
 	return new Response(`Signal '${signal}' received.`, {
 		headers: { 'Content-Type': 'text/plain' }

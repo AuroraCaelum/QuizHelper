@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { settingsStore, type Team } from '$lib/stores';
+	import { settingsStore, teamStore, type Team } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
@@ -22,19 +22,30 @@
 	onMount(() => {
 		const eventSource = new EventSource('/game/events');
 		eventSource.onmessage = (event) => {
-			const { type, payload } = JSON.parse(event.data);
-			if (type === 'signal') {
-				handleSignal(payload);
+			const data = JSON.parse(event.data);
+
+			if (data.sig && data.score) {
+				const team = teams.find((t) => t.signal === data.sig);
+				if (team) {
+					handleScoreChange(team, data.score);
+				}
+			} else if (data.type === 'signal') {
+				handleSignal(data.payload);
 			}
 		};
 
-		const unsubscribe = settingsStore.subscribe((settings) => {
-			teams = settings.teams;
+		const unsubscribeSettings = settingsStore.subscribe((settings) => {
+			// we can use this if needed in the future
+		});
+
+		const unsubscribeTeams = teamStore.subscribe((teamsValue) => {
+			teams = teamsValue;
 		});
 
 		return () => {
 			eventSource.close();
-			unsubscribe();
+			unsubscribeSettings();
+			unsubscribeTeams();
 		};
 	});
 

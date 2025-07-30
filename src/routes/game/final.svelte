@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { settingsStore, type Team } from '$lib/stores';
+	import { settingsStore, teamStore, type Team } from '$lib/stores';
 
 	let activeTeam: Team | null = null;
 	let activeTeamTimeout: number;
@@ -53,7 +53,7 @@
 	function handleSignal(signal: string) {
 		if (isLocked || activeTeam) return;
 
-		const team = $settingsStore.teams.find((t) => t.signal === signal);
+		const team = $teamStore.find((t) => t.signal === signal);
 		if (team) {
 			activeTeam = team;
 			isLocked = true; // Lock immediately
@@ -78,7 +78,7 @@
 		if (
 			!isNaN(parseInt(key)) &&
 			parseInt(key) > 0 &&
-			parseInt(key) <= $settingsStore.numberOfTeams
+			parseInt(key) <= $teamStore.length
 		) {
 			pendingTeamNumber = key;
 			// Reset after 1s if no arrow key is pressed
@@ -91,14 +91,14 @@
 		if ((key === 'ArrowUp' || key === 'ArrowDown') && pendingTeamNumber) {
 			event.preventDefault();
 			const teamIndex = parseInt(pendingTeamNumber) - 1;
-			if (teamIndex >= 0 && teamIndex < $settingsStore.teams.length) {
+			if (teamIndex >= 0 && teamIndex < $teamStore.length) {
 				if (key === 'ArrowUp') {
-					$settingsStore.teams[teamIndex].score++;
+					$teamStore[teamIndex].score++;
 				} else {
-					$settingsStore.teams[teamIndex].score--;
+					$teamStore[teamIndex].score--;
 				}
 				// Force a store update because we're modifying an object within an array
-				settingsStore.set($settingsStore);
+				teamStore.set($teamStore);
 			}
 			pendingTeamNumber = null;
 			return;
@@ -126,15 +126,22 @@
 	// --- Lifecycle Hook ---
 	onMount(() => {
 		// Reset all scores to 0 when the game page is mounted
-		$settingsStore.teams.forEach((team) => (team.score = 0));
-		settingsStore.set($settingsStore);
+		$teamStore.forEach((team) => (team.score = 0));
+		teamStore.set($teamStore);
 
 		// Connect to the Server-Sent Events stream
 		const eventSource = new EventSource('/game/events');
 
 		eventSource.onmessage = (event) => {
 			const data = JSON.parse(event.data);
-			if (data.type === 'signal') {
+
+			if (data.sig && data.score) {
+				const team = $teamStore.find((t) => t.signal === data.sig);
+				if (team) {
+					team.score += data.score;
+					teamStore.set($teamStore);
+				}
+			} else if (data.type === 'signal') {
 				handleSignal(data.payload);
 			}
 		};
@@ -155,11 +162,11 @@
 >
 	<!-- Team Scores Grid -->
 	<div class="grid h-full w-full grid-cols-3 grid-rows-2 p-8">
-		{#each $settingsStore.teams as team, i}
+		{#each $teamStore as team, i}
 			<div
 				class="bg-opacity-60 m-2 flex flex-col rounded-lg border-2 border-white/30 bg-black p-4 backdrop-blur-sm {getPositionClasses(
 					i,
-					$settingsStore.teams.length
+					$teamStore.length
 				)}"
 			>
 				<div class="truncate text-3xl font-bold text-cyan-300 drop-shadow-lg lg:text-5xl">

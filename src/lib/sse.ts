@@ -1,7 +1,7 @@
 // A more robust, multi-client-aware event bus.
 const controllers = new Set<ReadableStreamDefaultController>();
 
-export const eventBus = {
+export const sse = {
 	/**
 	 * Adds a new client's controller to the broadcast list.
 	 * @param controller The controller from the new ReadableStream.

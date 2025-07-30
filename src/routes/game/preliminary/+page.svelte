@@ -107,6 +107,20 @@
 		};
 	});
 
+	// Prevent accidental navigation
+	onMount(() => {
+		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+			event.preventDefault();
+			return (event.returnValue = 'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
+		};
+
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	});
+
 	function handleScoreChange(team: Team, amount: number) {
 		team.score += amount;
 		teams = [...teams]; // Trigger reactivity

@@ -62,6 +62,10 @@
 		return [...inCutline, ...outOfCutline];
 	})();
 
+	$: cutline = $settingsStore.cutline;
+	$: promotionZoneTeams = sortedTeams.slice(0, cutline);
+	$: otherTeams = sortedTeams.slice(cutline);
+
 	// Reactive font size calculation
 	$: teamNameSize = Math.max(1, 3 - teams.length * 0.1);
 	$: scoreSize = Math.max(2, 7 - teams.length * 0.5);
@@ -134,30 +138,46 @@
 <svelte:window on:keydown={handleKeyDown} />
 
 <div class="flex h-screen flex-col bg-gray-900 p-4 font-sans text-white">
-	<h1 class="mb-4 text-center text-3xl font-bold text-cyan-400">Preliminary Round</h1>
+	<h1 class="mb-8 text-center text-4xl font-bold text-cyan-400">Preliminary Round</h1>
 
-	<div class="flex flex-grow items-stretch justify-center space-x-2">
-		{#each sortedTeams as team, i (team.id)}
-			<div animate:flip={{ duration: 500 }} class="flex items-stretch space-x-2">
-				<div class="flex flex-grow flex-col items-center rounded-lg bg-gray-800 p-2">
-					<span class="mb-4 font-black text-cyan-400" style:font-size="{scoreSize}rem"
-						>{team.score}</span
-					>
-					<span
-						class="font-bold"
-						class:text-green-400={team.handicapApplied}
-						style:writing-mode="vertical-rl"
-						style:font-size="{teamNameSize}rem">{team.name}</span
-					>
+	<div class="flex flex-1 flex-col gap-8">
+		<!-- Promotion Zone -->
+		{#if cutline > 0}
+			<div class="promotion-zone rounded-xl border-2 border-yellow-400 bg-gray-800/50 p-6">
+				<h2 class="mb-4 text-center text-3xl font-semibold text-yellow-300">Promotion Zone</h2>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{#each promotionZoneTeams as team (team.id)}
+						<div
+							animate:flip={{ duration: 500 }}
+							class="flex flex-col items-center justify-center rounded-lg bg-gray-700 p-6 shadow-lg"
+						>
+							<span class="text-6xl font-black text-cyan-400">{team.score}</span>
+							<span
+								class="mt-2 text-3xl font-bold"
+								class:text-green-400={team.handicapApplied}
+								>{team.name}</span
+							>
+						</div>
+					{/each}
 				</div>
-
-				{#if $settingsStore.cutline > 0 && i < $settingsStore.cutline && i + 1 >= $settingsStore.cutline}
-					<div
-						transition:fade
-						class="h-3/4 w-1.5 flex-shrink-0 self-center rounded-full bg-red-500"
-					></div>
-				{/if}
 			</div>
-		{/each}
+		{/if}
+
+		<!-- Other Teams -->
+		<div class="other-teams flex-1 overflow-y-auto rounded-lg bg-gray-800/30 p-4">
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+				{#each otherTeams as team (team.id)}
+					<div
+						animate:flip={{ duration: 500 }}
+						class="flex items-center justify-between rounded-md bg-gray-700 p-3 shadow"
+					>
+						<span class="text-xl font-semibold" class:text-green-400={team.handicapApplied}
+							>{team.name}</span
+						>
+						<span class="text-2xl font-bold text-cyan-400">{team.score}</span>
+					</div>
+				{/each}
+			</div>
+		</div>
 	</div>
 </div>

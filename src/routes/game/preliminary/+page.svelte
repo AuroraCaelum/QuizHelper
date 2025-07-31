@@ -11,12 +11,7 @@
 		const handicapCutline = $settingsStore.handicapCutline;
 		const anyHandicappedTeamHasScored = teams.some((t) => t.handicapApplied && t.score > 0);
 
-		if (
-			cutline <= 0 ||
-			!handicapCutline ||
-			handicapCutline <= 0 ||
-			!anyHandicappedTeamHasScored
-		) {
+		if (cutline <= 0 || !handicapCutline || handicapCutline <= 0 || !anyHandicappedTeamHasScored) {
 			return teams.slice().sort((a, b) => b.score - a.score);
 		}
 
@@ -61,6 +56,22 @@
 
 		return [...inCutline, ...outOfCutline];
 	})();
+
+	let teamRanks = new Map<number, number>();
+
+	$: {
+		// Sort teams by score to determine rank
+		const newRanks = new Map<number, number>();
+		let currentRank = 1;
+		for (let i = 0; i < sortedTeams.length; i++) {
+			// Increment rank only when the score is lower than the previous team's score
+			if (i > 0 && sortedTeams[i].score < sortedTeams[i - 1].score) {
+				currentRank = i + 1;
+			}
+			newRanks.set(sortedTeams[i].id, currentRank);
+		}
+		teamRanks = newRanks;
+	}
 
 	$: cutline = $settingsStore.cutline;
 	$: promotionZoneTeams = sortedTeams.slice(0, cutline);
@@ -109,16 +120,25 @@
 
 	// Prevent accidental navigation
 	onMount(() => {
-		// Push a new state to the history stack to intercept the back button
-		history.pushState(null, '', location.href);
+		let isNavigatingBack = false;
 
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 			event.preventDefault();
-			return (event.returnValue = 'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
+			return (event.returnValue =
+				'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
 		};
 
 		const handlePopState = () => {
-			if (confirm('Do not refresh or navigate backward if the game is still running! It might cause losing all the data.')) {
+			if (isNavigatingBack) {
+				return;
+			}
+
+			if (
+				confirm(
+					'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.'
+				)
+			) {
+				isNavigatingBack = true;
 				history.back(); // Allow navigation
 			} else {
 				// Push the state back to effectively cancel the back action
@@ -128,6 +148,9 @@
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('popstate', handlePopState);
+
+		// Push a new state to the history stack to intercept the back button
+		history.pushState(null, '', location.href);
 
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -166,23 +189,33 @@
 <svelte:window on:keydown={handleKeyDown} />
 
 <div class="flex h-screen flex-col bg-gray-900 p-4 font-sans text-white">
-	<h1 class="mb-8 text-center text-4xl font-bold text-cyan-400">Preliminary Round</h1>
+	<h1 class="mb-8 text-center text-4xl font-bold text-cyan-400">
+		제2회 성경대로믿는사람들 한글킹제임스성경 암송대회 예선
+	</h1>
 
 	<div class="flex flex-1 flex-col gap-8">
 		<!-- Promotion Zone -->
 		{#if cutline > 0}
 			<div class="promotion-zone rounded-xl border-2 border-yellow-400 bg-gray-800/50 p-6">
-				<h2 class="mb-4 text-center text-3xl font-semibold text-yellow-300">Promotion Zone</h2>
+				<h2 class="mb-4 text-center text-3xl font-semibold text-yellow-300">결승 진출 커트라인</h2>
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{#each promotionZoneTeams as team (team.id)}
 						<div
 							animate:flip={{ duration: 500 }}
-							class="flex flex-col items-center justify-center rounded-lg bg-gray-700 p-6 shadow-lg"
+							class="relative flex flex-col items-center justify-center rounded-lg bg-gray-700 p-6 shadow-lg"
 						>
-							<span class="text-6xl font-black text-cyan-400">{team.score}</span>
+							<!-- Yellow for 1st place, silver for 2nd place, bronze for 3rd place, white for others -->
 							<span
-								class="mt-2 text-3xl font-bold"
-								class:text-green-400={team.handicapApplied}
+								class="absolute top-2 left-2 rounded-full bg-yellow-400 px-3 py-1 text-sm font-semibold text-black"
+								class:bg-yellow-400={teamRanks.get(team.id) === 1}
+								class:bg-gray-300={teamRanks.get(team.id) === 2}
+								class:bg-orange-500={teamRanks.get(team.id) === 3}
+								class:bg-white={(teamRanks.get(team.id) ?? 0) > 3}
+							>
+								{teamRanks.get(team.id)}위
+							</span>
+							<span class="text-6xl font-black text-cyan-400">{team.score}</span>
+							<span class="mt-2 text-3xl font-bold" class:text-green-400={team.handicapApplied}
 								>{team.name}</span
 							>
 						</div>
@@ -197,9 +230,18 @@
 				{#each otherTeams as team (team.id)}
 					<div
 						animate:flip={{ duration: 500 }}
-						class="flex items-center justify-between rounded-md bg-gray-700 p-3 shadow"
+						class="flex items-center gap-3 rounded-md bg-gray-700 p-3 shadow"
 					>
-						<span class="text-xl font-semibold" class:text-green-400={team.handicapApplied}
+						<span
+							class="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold text-black"
+							class:bg-yellow-400={teamRanks.get(team.id) === 1}
+							class:bg-gray-300={teamRanks.get(team.id) === 2}
+							class:bg-orange-500={teamRanks.get(team.id) === 3}
+							class:bg-white={(teamRanks.get(team.id) ?? 0) > 3}
+						>
+							{teamRanks.get(team.id)}
+						</span>
+						<span class="flex-1 text-xl font-semibold" class:text-green-400={team.handicapApplied}
 							>{team.name}</span
 						>
 						<span class="text-2xl font-bold text-cyan-400">{team.score}</span>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { settingsStore, teamStore, type Team } from '$lib/stores';
-    import { flip } from 'svelte/animate';
+	import { flip } from 'svelte/animate';
 
 	let activeTeam: Team | null = null;
 	let activeTeamTimeout: number;
@@ -151,16 +151,25 @@
 
 	// Prevent accidental navigation
 	onMount(() => {
-		// Push a new state to the history stack to intercept the back button
-		history.pushState(null, '', location.href);
+		let isNavigatingBack = false;
 
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 			event.preventDefault();
-			return (event.returnValue = 'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
+			return (event.returnValue =
+				'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
 		};
 
 		const handlePopState = () => {
-			if (confirm('Do not refresh or navigate backward if the game is still running! It might cause losing all the data.')) {
+			if (isNavigatingBack) {
+				return;
+			}
+
+			if (
+				confirm(
+					'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.'
+				)
+			) {
+				isNavigatingBack = true;
 				history.back(); // Allow navigation
 			} else {
 				// Push the state back to effectively cancel the back action
@@ -170,6 +179,9 @@
 
 		window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('popstate', handlePopState);
+
+		// Push a new state to the history stack to intercept the back button
+		history.pushState(null, '', location.href);
 
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -184,23 +196,31 @@
 	class="relative flex h-screen w-screen flex-col overflow-hidden bg-cover bg-center p-4 font-sans text-white"
 	style="background-image: url(/bg.jpg);"
 >
-    <h1 class="mb-8 text-center text-4xl font-bold text-cyan-400 drop-shadow-lg">Final Round</h1>
+	<!-- <h1 class="mb-8 text-center text-4xl font-bold text-cyan-400 drop-shadow-lg">Final Round</h1> -->
 
-    <div class="flex flex-1 items-center justify-center">
-        <div class="grid w-full max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {#each $teamStore as team (team.id)}
-                <div
-                    animate:flip={{ duration: 500 }}
-                    class="relative flex flex-col items-center justify-center rounded-xl border-2 border-white/30 bg-black/60 p-6 backdrop-blur-sm shadow-lg"
-                >
-                    <div class="absolute top-2 left-2 text-2xl font-bold text-yellow-400">#{teamRanks.get(team.id) || '-'}</div>
-                    <span class="text-6xl font-black text-cyan-400 drop-shadow-lg">{team.score}</span>
-                    <span class="mt-2 text-3xl font-bold text-white drop-shadow-md">{team.name}</span>
-                </div>
-            {/each}
-        </div>
-    </div>
-
+	<div class="flex flex-1 items-center justify-center">
+		<div class="grid w-full max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+			{#each $teamStore as team (team.id)}
+				<div
+					animate:flip={{ duration: 500 }}
+					class="relative flex flex-col items-center justify-center rounded-xl border-2 border-white/30 bg-black/60 p-6 shadow-lg backdrop-blur-sm"
+				>
+					<!-- Yellow for 1st place, silver for 2nd place, bronze for 3rd place, white for others -->
+					<span
+						class="absolute top-2 left-2 rounded-full bg-yellow-400 px-3 py-1 text-sm font-semibold text-black"
+						class:bg-yellow-400={teamRanks.get(team.id) === 1}
+						class:bg-gray-300={teamRanks.get(team.id) === 2}
+						class:bg-orange-500={teamRanks.get(team.id) === 3}
+						class:bg-white={(teamRanks.get(team.id) ?? 0) > 3}
+					>
+						{teamRanks.get(team.id)}위
+					</span>
+					<span class="text-6xl font-black text-cyan-400 drop-shadow-lg">{team.score}</span>
+					<span class="mt-2 text-3xl font-bold text-white drop-shadow-md">{team.name}</span>
+				</div>
+			{/each}
+		</div>
+	</div>
 
 	<!-- Active Team Display (Overlay) -->
 	{#if activeTeam}
@@ -220,7 +240,7 @@
 	<!-- Feedback Message Display (Overlay) -->
 	{#if feedbackMessage}
 		<div
-			class="absolute inset-0 z-20 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md"
+			class="bg-opacity-70 absolute inset-0 z-20 flex items-center justify-center bg-black backdrop-blur-md"
 		>
 			<div
 				class="animate-pulse text-center text-8xl font-black md:text-9xl lg:text-[12rem]"

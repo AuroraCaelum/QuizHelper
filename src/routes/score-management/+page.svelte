@@ -49,13 +49,13 @@
 </script>
 
 <div class="container">
-	<h1>Score Management</h1>
+	<h1>점수 관리 페이지</h1>
 
 	<div class="game-type">
-		<label for="game-mode">Game Mode:</label>
+		<label for="game-mode">게임 모드:</label>
 		<select id="game-mode" on:change={handleGameModeChange}>
-			<option value="preliminary" selected={gameMode === 'preliminary'}>Preliminary Mode</option>
-			<option value="final" selected={gameMode === 'final'}>Final Mode</option>
+			<option value="preliminary" selected={gameMode === 'preliminary'}>예선전 모드</option>
+			<option value="final" selected={gameMode === 'final'}>결승전 모드</option>
 		</select>
 	</div>
 
@@ -74,10 +74,6 @@
 							>{option > 0 ? `+${option}` : option}</button
 						>
 					{/each}
-					<!-- <button on:click={() => updateScore(team.id, -3)}>-3</button>
-					<button on:click={() => updateScore(team.id, -1)}>-1</button>
-					<button on:click={() => updateScore(team.id, 1)}>+1</button>
-					<button on:click={() => updateScore(team.id, 3)}>+3</button> -->
 				</div>
 			</div>
 		{/each}
@@ -87,16 +83,6 @@
 <style>
 	.container {
 		padding: 2rem;
-	}
-
-	.ip-config {
-		margin-bottom: 2rem;
-	}
-
-	#ip-address {
-		padding: 0.2rem;
-		border-radius: 4px;
-		border: 1px solid #ccc;
 	}
 
 	.team-list {

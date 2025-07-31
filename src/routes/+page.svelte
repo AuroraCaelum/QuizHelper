@@ -30,7 +30,34 @@
 
 	// --- Event Handlers ---
 	function handleGameModeChange() {
-		$settingsStore.numberOfTeams = defaultSettings.numberOfTeams;
+		const gameMode = $settingsStore.gameMode;
+		if (gameMode === 'final') {
+			$settingsStore.cutline = 0; // Reset cutline for final mode
+			$settingsStore.handicapCutline = 0; // Reset handicap cutline for final mode
+			const numTeams = $settingsStore.numberOfTeams;
+			const defaultTeams = Array.from({ length: numTeams }, (_, i) => ({
+				id: i + 1,
+				name: `Team ${i + 1}`,
+				signal: String.fromCharCode(65 + i),
+				score: 0,
+				handicapApplied: false
+			}));
+			teamStore.set(defaultTeams);
+		}
+		if (gameMode === 'preliminary') {
+			// Ensure cutline and handicap cutline are set to default values
+			$settingsStore.cutline = defaultSettings.cutline;
+			$settingsStore.handicapCutline = defaultSettings.handicapCutline;
+			const numTeams = 15;
+			const defaultTeams = Array.from({ length: numTeams }, (_, i) => ({
+				id: i + 1,
+				name: `Team ${i + 1}`,
+				signal: String.fromCharCode(65 + i),
+				score: 0,
+				handicapApplied: false
+			}));
+			teamStore.set(defaultTeams);
+		}
 	}
 
 	function handleResetSettings() {
@@ -113,7 +140,7 @@
 					class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
 					value={$settingsStore.gameMode}
 					on:change={(e) => {
-						$settingsStore.gameMode = e.currentTarget.value;
+						$settingsStore.gameMode = e.currentTarget.value as 'preliminary' | 'final';
 						handleGameModeChange();
 					}}
 				>

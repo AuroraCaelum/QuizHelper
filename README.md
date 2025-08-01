@@ -2,6 +2,13 @@
 
 성경침례교회 청년부 암송대회 지원 프로그램입니다.
 
+[간편 매뉴얼]
+1. [시스템 설정 방법](#시스템-요구사항)
+2. [기능 관련 사용 방법](#점수-관리자)
+3. [개발 관련 참고사항](#버튼-신호-엔드포인트)
+
+---
+
 ## 시스템 요구사항
 
 - Node.js version 18 or higher (설치 링크: [Node.js 공식 홈페이지](https://nodejs.org/ko/download))
@@ -51,6 +58,7 @@
 
  	**중요: 게임 종료 이후, 이 설정을 다시 `자동으로 IP 주소 받기 (Windows)`, `DHCP 사용 (macOS)`으로 변경하셔야 정상적인 인터넷 사용이 가능합니다.**
    
+---
 
 ## 점수 관리자
 - `결승전 모드`, `예선전 모드` : 게임 화면에서 **`~`** 키를 눌러 점수 관리자 창을 열 수 있습니다. 게임 점수판 화면을 띄우고, 별도의 탭(혹은 창)에서 점수 관리자를 사용하세요.
@@ -60,6 +68,28 @@
 	-  (점수 단위 변경은 [routes/game/preliminary/+page.svelte](https://github.com/AuroraCaelum/QuizHelper/blob/master/src/routes/game/preliminary/%2Bpage.svelte)의 `handleKeyDown()`을 확인하세요.)
 
 - `점수 관리자` : 점수 관리자의 감/가산 단위를 수정하고자 하는 경우, [routes/score-management/+page.svelte](https://github.com/AuroraCaelum/QuizHelper/blob/master/src/routes/score-management/%2Bpage.svelte)의 `negativeScoreOption`, `scoreOptions`, `handleGameModeChange()`를 확인하세요.
+
+## CSV 불러오기 [예선전 전용]
+
+팀 번호, 팀 이름, 팀 타입이 들어있는 `CSV` 파일을 이용해 예선전 팀을 빠르게 구성할 수 있습니다.
+
+아래 형식에 맞춘 `teamdata.csv` 파일을 `static` 폴더에 넣으면 사용 가능합니다.
+
+```csv
+1,첫번째팀이름,일반부
+2,두번째팀이름,학생부
+```
+
+**팀 타입이 정확히 '학생부'로 기입된 경우에만 자동 핸디캡 활성화가 가능합니다. 해당 팀 타입 설정은 [routes/+page.svelte](https://github.com/AuroraCaelum/QuizHelper/blob/master/src/routes/%2Bpage.svelte)의 `loadCSV()`에서 가능합니다.**
+
+## 결승전 부저 사용 관련 로직
+
+- 부저 입력이 들어온 경우, Interrupt Delay 시간동안은 새로운 부저 입력에 반응하지 않습니다.
+- 부저 입력이 들어온 이후, 정답 혹은 오답 처리가 가능합니다.
+- 오답 처리를 하는 경우, 남은 Interrupt Delay에 관계없이 새로운 부저 입력에 반응합니다.
+- 정답 처리를 하는 경우, 남은 Interrupt Delay에 관계없이 3초간 새로운 부저 입력을 무시합니다.
+
+---
 
 ## 버튼 신호 엔드포인트
 

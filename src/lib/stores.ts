@@ -22,6 +22,7 @@ export interface Settings {
 	gameMode: 'preliminary' | 'final';
 	cutline: number;
 	handicapCutline?: number; // Optional for preliminary mode
+    gameTitle?: string;
 }
 
 export const defaultSettings: Settings = {
@@ -34,7 +35,8 @@ export const defaultSettings: Settings = {
 	wrongAnswerShortcut: 'w',
 	gameMode: 'final',
 	cutline: 0,
-	handicapCutline: 0 // Default to 0 for final mode
+	handicapCutline: 0, // Default to 0 for final mode
+    gameTitle: '제2회 성경대로믿는사람들 한글킹제임스성경 암송대회'
 };
 
 function generateInitialTeams(numTeams: number): Team[] {
@@ -101,3 +103,41 @@ if (browser) {
 		}
 	});
 }
+
+// --- Score History Store ---
+export interface ScoreHistoryEntry {
+	id: number; // Unique ID for the entry
+	teamName: string;
+	scoreChange: number;
+	timestamp: number;
+}
+
+const createScoreHistoryStore = () => {
+	const { subscribe, update } = writable<ScoreHistoryEntry[]>([]);
+
+	const addEntry = (teamName: string, scoreChange: number) => {
+		const newEntry: ScoreHistoryEntry = {
+			id: Date.now(),
+			teamName,
+			scoreChange,
+			timestamp: Date.now()
+		};
+
+		update((history) => {
+			const newHistory = [newEntry, ...history].slice(0, 10); // Keep max 10 entries
+			return newHistory;
+		});
+
+		// Remove the entry after 10 seconds
+		setTimeout(() => {
+			update((history) => history.filter((entry) => entry.id !== newEntry.id));
+		}, 10000);
+	};
+
+	return {
+		subscribe,
+		addEntry
+	};
+};
+
+export const scoreHistoryStore = createScoreHistoryStore();

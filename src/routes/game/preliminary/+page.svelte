@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { settingsStore, teamStore, type Team } from '$lib/stores';
+	import { settingsStore, teamStore, scoreHistoryStore, type Team } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
@@ -125,7 +125,7 @@
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 			event.preventDefault();
 			return (event.returnValue =
-				'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.');
+				'게임이 진행중일 때 뒤로가기를 하지 마세요! 점수가 초기화될 수 있습니다.');
 		};
 
 		const handlePopState = () => {
@@ -133,11 +133,7 @@
 				return;
 			}
 
-			if (
-				confirm(
-					'Do not refresh or navigate backward if the game is still running! It might cause losing all the data.'
-				)
-			) {
+			if (confirm('게임이 진행중일 때 뒤로가기를 하지 마세요! 점수가 초기화될 수 있습니다.')) {
 				isNavigatingBack = true;
 				history.back(); // Allow navigation
 			} else {
@@ -161,6 +157,7 @@
 	function handleScoreChange(team: Team, amount: number) {
 		team.score += amount;
 		teams = [...teams]; // Trigger reactivity
+		scoreHistoryStore.addEntry(team.name, amount);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -248,6 +245,23 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+	</div>
+
+	<!-- Score History -->
+	<div class="fixed right-0 bottom-0 left-0 flex justify-center p-2">
+		<div class="flex gap-2 overflow-x-auto whitespace-nowrap">
+			{#each $scoreHistoryStore as entry (entry.id)}
+				<div
+					class="rounded-full bg-black/70 px-3 py-1 text-sm shadow-lg backdrop-blur-sm"
+					transition:fade={{ duration: 300 }}
+				>
+					<span>{entry.teamName}</span>
+					<span class="font-bold {entry.scoreChange > 0 ? 'text-green-400' : 'text-red-400'}">
+						{entry.scoreChange > 0 ? '+' : ''}{entry.scoreChange}
+					</span>
+				</div>
+			{/each}
 		</div>
 	</div>
 </div>

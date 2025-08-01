@@ -29,7 +29,37 @@
    npm run dev
    ```
 
-4. **브라우저를 열고** `http://localhost:9090` 에 접속하세요.
+4. **브라우저를 열고** [http://localhost:9090](http://localhost:9090) 에 접속하세요.
+
+5. _**(옵션) QUIZ_OPER Wi-Fi에 연결하세요. [물리 버튼 사용 시]**_
+
+6. _**(옵션) 컴퓨터 고정IP 변경** [물리 버튼 사용 시]:_
+
+	a. `Windows`를 사용하는 경우
+
+		제어판 > 네트워크 및 인터넷 > 네트워크 연결 > Wi-Fi > (우클릭 후) 속성 > 인터넷 프로토콜 버전 4(TCP/IPv4) 속성 > 다음으로 IP 주소 사용 클릭 후 아래와 같이 세팅:
+		IP 주소: 192.168.100.101
+		서브넷 마스크: 255.255.255.0
+		기본 게이트웨이: 192.168.100.0
+
+	b. `macOS`를 사용하는 경우
+
+   		설정 > Wi-Fi > 연결된 와이파이 옆의 <세부사항...> 클릭 > TCP/IP > IPv4 구성 - 수동으로 설정 후 아래와 같이 세팅:
+   		IP 주소: 192.168.100.101
+		서브넷 마스크: 255.255.255.0
+		라우터: 192.168.100.0
+
+ 	**중요: 게임 종료 이후, 이 설정을 다시 `자동으로 IP 주소 받기 (Windows)`, `DHCP 사용 (macOS)`으로 변경하셔야 정상적인 인터넷 사용이 가능합니다.**
+   
+
+## 점수 관리자
+- `결승전 모드`, `예선전 모드` : 게임 화면에서 **`~`** 키를 눌러 점수 관리자 창을 열 수 있습니다. 게임 점수판 화면을 띄우고, 별도의 탭(혹은 창)에서 점수 관리자를 사용하세요.
+
+- `예선전 모드` : 게임 설정 시 입력한 `고유 신호`에 해당하는 자판을 눌러 점수를 추가할 수 있습니다.
+	- <신호 키> 입력 시 **+5**점, Shift + <신호 키> 입력 시 **-5**점이 반영됩니다.
+	-  (점수 단위 변경은 [routes/game/preliminary/+page.svelte](https://github.com/AuroraCaelum/QuizHelper/blob/master/src/routes/game/preliminary/%2Bpage.svelte)의 `handleKeyDown()`을 확인하세요.)
+
+- `점수 관리자` : 점수 관리자의 감/가산 단위를 수정하고자 하는 경우, [routes/score-management/+page.svelte](https://github.com/AuroraCaelum/QuizHelper/blob/master/src/routes/score-management/%2Bpage.svelte)의 `negativeScoreOption`, `scoreOptions`, `handleGameModeChange()`를 확인하세요.
 
 ## 버튼 신호 엔드포인트
 

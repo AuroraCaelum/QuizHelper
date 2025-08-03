@@ -227,8 +227,8 @@
 		{/each}
 	</div>
 
-	<div class="flex flex-1 flex-col justify-around">
-		<h1 class="text-center text-4xl font-bold text-cyan-400 drop-shadow-lg">
+	<div class="flex flex-1 flex-col justify-center gap-y-25">
+		<h1 class="text-center text-5xl font-bold text-cyan-400 drop-shadow-lg">
 			제2회 성경대로믿는사람들 한글킹제임스성경 암송대회 결승
 		</h1>
 

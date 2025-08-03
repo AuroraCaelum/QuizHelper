@@ -107,10 +107,24 @@
 			if (teamIndex >= 0 && teamIndex < $teamStore.length) {
 				const team = $teamStore[teamIndex];
 				const scoreChange = key === 'ArrowUp' ? 1 : -1;
-				team.score += scoreChange;
-				// Force a store update because we're modifying an object within an array
-				teamStore.set($teamStore);
+				const newScore = team.score + scoreChange;
+
+				// Update teamStore locally for immediate feedback
+				teamStore.update((currentTeams) =>
+					currentTeams.map((t) => (t.id === team.id ? { ...t, score: newScore } : t))
+				);
 				scoreHistoryStore.addEntry(team.name, scoreChange);
+
+				// Broadcast the score change to other clients
+				fetch('/score', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						teams: $teamStore.map((t) => (t.id === team.id ? { ...t, score: newScore } : t))
+					})
+				});
 			}
 			pendingTeamNumber = null;
 			return;
@@ -154,14 +168,8 @@
 				}
 			} else if (data.type === 'signal') {
 				handleSignal(data.payload);
-			} else if (data.type === 'score_update') {
-				const { teamName, scoreChange } = data.payload;
-				const team = $teamStore.find((t) => t.name === teamName);
-				if (team) {
-					team.score += scoreChange;
-					teamStore.set($teamStore);
-					scoreHistoryStore.addEntry(team.name, scoreChange);
-				}
+			} else if (data.type === 'teams') {
+				teamStore.set(data.payload);
 			}
 		};
 

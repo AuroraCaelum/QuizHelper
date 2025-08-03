@@ -98,8 +98,8 @@
 				if (team) {
 					handleScoreChange(team, data.score);
 				}
-			} else if (data.type === 'signal') {
-				handleSignal(data.payload);
+			} else if (data.type === 'teams') {
+				teams = data.payload;
 			}
 		};
 
@@ -155,9 +155,22 @@
 	});
 
 	function handleScoreChange(team: Team, amount: number) {
-		team.score += amount;
-		teams = [...teams]; // Trigger reactivity
+		const newScore = team.score + amount;
+		teamStore.update((currentTeams) =>
+			currentTeams.map((t) => (t.id === team.id ? { ...t, score: newScore } : t))
+		);
 		scoreHistoryStore.addEntry(team.name, amount);
+
+		// Broadcast the score change to other clients
+		fetch('/score', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				teams: teams.map((t) => (t.id === team.id ? { ...t, score: newScore } : t))
+			})
+		});
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {

@@ -28,9 +28,20 @@
 	async function updateScore(teamId: number, scoreChange: number) {
 		const team = teams.find((t) => t.id === teamId);
 		if (team) {
-			team.score += scoreChange;
-			teamStore.update((currentTeams) => {
-				return currentTeams.map((t) => (t.id === teamId ? { ...t, score: team.score } : t));
+			const newScore = team.score + scoreChange;
+			teamStore.update((currentTeams) =>
+				currentTeams.map((t) => (t.id === teamId ? { ...t, score: newScore } : t))
+			);
+
+			// Broadcast the score change to other clients
+			await fetch('/score', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					teams: teams.map((t) => (t.id === teamId ? { ...t, score: newScore } : t))
+				})
 			});
 		}
 	}
